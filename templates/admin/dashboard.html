@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel — FindIT{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="text-white mb-1"><i class="bi bi-shield-lock text-warning me-2"></i> Admin Panel (Member 3 Integration)</h2>
+    <p class="text-muted mb-0">Review pending claims, inspect verification scores, and view audit trail.</p>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="card-custom p-4">
+      <h5 class="text-warning mb-3"><i class="bi bi-hourglass-split me-2"></i> Pending Claims Requiring Review ({{ pending_claims|length }})</h5>
+      {% if pending_claims %}
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead>
+            <tr class="text-muted border-bottom border-secondary">
+              <th>Claim ID</th>
+              <th>Claimant</th>
+              <th>Lost Item</th>
+              <th>Found Item</th>
+              <th>Verification Score</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in pending_claims %}
+            <tr>
+              <td class="fw-bold text-info">#{{ c.id }}</td>
+              <td>{{ c.claimant.full_name }} ({{ c.claimant.username }})</td>
+              <td>{{ c.lost_report.item_name }}</td>
+              <td>{{ c.found_report.item_name }}</td>
+              <td>
+                {% if c.verification_score is not none %}
+                  <span class="fw-bold text-warning">{{ c.verification_score }}%</span>
+                  <small class="text-muted d-block">({{ c.verification_confidence }})</small>
+                {% else %}
+                  <span class="text-muted">Not answered</span>
+                {% endif %}
+              </td>
+              <td><span class="badge bg-warning">{{ c.status }}</span></td>
+              <td>
+                <a href="{{ url_for('admin.review_claim', claim_id=c.id) }}" class="btn btn-warning btn-sm fw-semibold">
+                  <i class="bi bi-search me-1"></i> Review Claim
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No pending claims requiring review.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="card-custom p-4">
+      <h5 class="text-info mb-3"><i class="bi bi-journal-text me-2"></i> System Audit Logs (Member 3 Audit Trail)</h5>
+      {% if audit_logs %}
+      <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+        <table class="table table-dark table-striped align-middle mb-0 small">
+          <thead>
+            <tr class="text-muted border-bottom border-secondary">
+              <th>Timestamp</th>
+              <th>User ID</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in audit_logs %}
+            <tr>
+              <td class="text-muted">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+              <td>{{ log.user.username if log.user else 'System' }}</td>
+              <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+              <td class="text-light">{{ log.details }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No audit logs recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

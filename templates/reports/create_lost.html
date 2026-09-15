@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Report Lost Item — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom p-4 shadow">
+      <h3 class="text-white mb-3"><i class="bi bi-bag-x text-warning me-2"></i> Report Lost Item</h3>
+      <p class="text-muted small mb-4">Provide detailed information. The Intelligent Matching Engine will evaluate candidate matches automatically.</p>
+
+      <form method="POST" action="{{ url_for('report.create_lost') }}" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label text-muted">Item Name *</label>
+            <input type="text" name="item_name" class="form-control form-control-custom" required placeholder="e.g. Black Leather Samsung Wallet">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Category *</label>
+            <select name="category_id" class="form-select form-control-custom" required>
+              {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted">Description *</label>
+            <textarea name="description" class="form-control form-control-custom" rows="3" required placeholder="Detailed item description (contents, appearance, markings)..."></textarea>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label text-muted">Brand / Manufacturer</label>
+            <input type="text" name="brand" class="form-control form-control-custom" placeholder="e.g. Samsung, Apple, Wildcraft">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Color</label>
+            <input type="text" name="color" class="form-control form-control-custom" placeholder="e.g. Black, Navy Blue">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Distinguishing Features</label>
+            <input type="text" name="distinguishing_features" class="form-control form-control-custom" placeholder="e.g. Scratch near zipper, ID inside">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Campus Location *</label>
+            <input type="text" name="location_text" class="form-control form-control-custom" required placeholder="e.g. Main Library 2nd Floor Study Room 204">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-muted">Date Lost *</label>
+            <input type="date" name="lost_date" class="form-control form-control-custom" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-muted">Approximate Time</label>
+            <input type="time" name="lost_time" class="form-control form-control-custom">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Latitude (Optional)</label>
+            <input type="number" step="any" name="latitude" class="form-control form-control-custom" placeholder="12.9716">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted">Longitude (Optional)</label>
+            <input type="number" step="any" name="longitude" class="form-control form-control-custom" placeholder="77.5946">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted">Upload Photo (Optional)</label>
+            <input type="file" name="image" class="form-control form-control-custom" accept="image/*">
+          </div>
+
+          <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-warning w-100 py-2 fw-bold">Submit Report & Run Matching</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

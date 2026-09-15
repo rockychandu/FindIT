@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Report Found Item — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom p-4 shadow">
+      <h3 class="text-white mb-3"><i class="bi bi-bag-check text-success me-2"></i> Report Found Item</h3>
+      <p class="text-muted small mb-4">Provide item details and optional private verification questions to verify true owner claims.</p>
+
+      <form method="POST" action="{{ url_for('report.create_found') }}" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label text-muted">Item Name *</label>
+            <input type="text" name="item_name" class="form-control form-control-custom" required placeholder="e.g. Black Leather Samsung Wallet">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Category *</label>
+            <select name="category_id" class="form-select form-control-custom" required>
+              {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted">Description *</label>
+            <textarea name="description" class="form-control form-control-custom" rows="3" required placeholder="Description of the item found..."></textarea>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label text-muted">Brand / Manufacturer</label>
+            <input type="text" name="brand" class="form-control form-control-custom" placeholder="e.g. Samsung">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Color</label>
+            <input type="text" name="color" class="form-control form-control-custom" placeholder="e.g. Black">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Distinguishing Features</label>
+            <input type="text" name="distinguishing_features" class="form-control form-control-custom" placeholder="e.g. Small scratch near zipper">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Found Location *</label>
+            <input type="text" name="location_text" class="form-control form-control-custom" required placeholder="e.g. Library 2nd Floor">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted">Storage Location</label>
+            <input type="text" name="storage_location" class="form-control form-control-custom" placeholder="e.g. Security Desk Box #4">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Date Found *</label>
+            <input type="date" name="found_date" class="form-control form-control-custom" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted">Approximate Time</label>
+            <input type="time" name="found_time" class="form-control form-control-custom">
+          </div>
+
+          <div class="col-12 mt-4">
+            <h6 class="text-info border-bottom border-secondary pb-2"><i class="bi bi-shield-lock me-2"></i> Private Owner Verification Questions (Optional)</h6>
+            <p class="small text-muted mb-3">Set private questions to challenge claimants. Expected answers are strictly protected on the server.</p>
+
+            <div class="mb-3">
+              <label class="form-label text-muted small">Verification Question 1</label>
+              <input type="text" name="verification_q1" class="form-control form-control-custom mb-2" placeholder="e.g. What specific ID card is inside the front pocket?">
+              <input type="text" name="verification_a1" class="form-control form-control-custom" placeholder="Expected Answer (Server-side only): e.g. Student ID for John Doe">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-muted small">Verification Question 2</label>
+              <input type="text" name="verification_q2" class="form-control form-control-custom mb-2" placeholder="e.g. Describe the sticker attached on the back.">
+              <input type="text" name="verification_a2" class="form-control form-control-custom" placeholder="Expected Answer (Server-side only): e.g. Blue circular logo sticker">
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted">Upload Photo (Optional)</label>
+            <input type="file" name="image" class="form-control form-control-custom" accept="image/*">
+          </div>
+
+          <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Submit Found Item Report</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Claim Status — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card-custom p-4 shadow text-center">
+      <div class="mb-3">
+        {% if claim.status == 'SUBMITTED' %}
+          <i class="bi bi-clock-history display-1 text-info"></i>
+        {% elif claim.status == 'UNDER_VERIFICATION' %}
+          <i class="bi bi-hourglass-split display-1 text-warning"></i>
+        {% elif claim.status == 'APPROVED' %}
+          <i class="bi bi-check-circle display-1 text-success"></i>
+        {% elif claim.status == 'REJECTED' %}
+          <i class="bi bi-x-circle display-1 text-danger"></i>
+        {% endif %}
+      </div>
+
+      <h3 class="text-white mb-2">Claim #{{ claim.id }} Status</h3>
+      <div class="mb-4">
+        <span class="badge bg-{{ 'success' if claim.status == 'APPROVED' else ('danger' if claim.status == 'REJECTED' else 'warning') }} fs-5 px-3 py-2">
+          {{ claim.status }}
+        </span>
+      </div>
+
+      {% if claim.verification_score is not none %}
+      <div class="p-3 bg-dark rounded border border-secondary mb-4 text-start">
+        <div class="row text-center">
+          <div class="col-md-6 border-end border-secondary">
+            <span class="text-muted small">Verification Score</span>
+            <div class="h4 text-info fw-bold mb-0">{{ claim.verification_score }}%</div>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted small">Confidence Level</span>
+            <div class="h5 text-warning fw-bold mb-0 mt-1">{{ claim.verification_confidence }}</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <p class="text-muted mb-4">
+        {% if claim.status == 'APPROVED' %}
+          Congratulations! Your ownership claim has been verified and approved by campus administration. Please contact security to arrange handover.
+        {% elif claim.status == 'REJECTED' %}
+          Your claim was reviewed and rejected. If you believe this is an error, please contact the campus security desk.
+        {% else %}
+          Your verification answers have been submitted. Campus administration is reviewing your claim.
+        {% endif %}
+      </p>
+
+      {% if claim.admin_notes %}
+      <div class="alert alert-dark border border-secondary text-start mb-4">
+        <strong>Admin Note:</strong> {{ claim.admin_notes }}
+      </div>
+      {% endif %}
+
+      <a href="{{ url_for('claim.my_claims_view') }}" class="btn btn-outline-light"><i class="bi bi-list-check me-1"></i> Back to My Claims</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Review Claim #{{ claim.id }} — FindIT Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Admin Panel</a>
+    <h2 class="text-white mb-0">Review Claim <span class="text-info">#{{ claim.id }}</span></h2>
+  </div>
+  <div>
+    <span class="badge bg-{{ 'success' if claim.status == 'APPROVED' else ('danger' if claim.status == 'REJECTED' else 'warning') }} fs-6">
+      {{ claim.status }}
+    </span>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Claimant & Reports Info -->
+  <div class="col-md-6">
+    <div class="card-custom p-4 h-100">
+      <h5 class="text-info mb-3"><i class="bi bi-person-bounding-box me-2"></i> Claimant Details</h5>
+      <p class="mb-1"><strong>Name:</strong> {{ claim.claimant.full_name }}</p>
+      <p class="mb-1"><strong>Username:</strong> {{ claim.claimant.username }}</p>
+      <p class="mb-1"><strong>College ID:</strong> {{ claim.claimant.college_id or 'N/A' }}</p>
+      <p class="mb-3"><strong>Email:</strong> {{ claim.claimant.email }}</p>
+
+      <hr class="border-secondary">
+
+      <h6 class="text-warning mb-2">Lost Item Reported:</h6>
+      <p class="small text-light mb-1"><strong>{{ claim.lost_report.item_name }}</strong></p>
+      <p class="small text-muted">{{ claim.lost_report.description }}</p>
+
+      <h6 class="text-success mb-2 mt-3">Found Item Matched:</h6>
+      <p class="small text-light mb-1"><strong>{{ claim.found_report.item_name }}</strong></p>
+      <p class="small text-muted">{{ claim.found_report.description }}</p>
+    </div>
+  </div>
+
+  <!-- Calculated Verification Breakdown -->
+  <div class="col-md-6">
+    <div class="card-custom p-4 h-100">
+      <h5 class="text-warning mb-3"><i class="bi bi-cpu me-2"></i> Verification Engine Analysis</h5>
+
+      <div class="p-3 bg-dark rounded border border-secondary mb-3 text-center">
+        <div class="text-muted small">Overall Verification Score</div>
+        <div class="display-6 fw-bold text-warning">{{ claim.verification_score or 0 }}%</div>
+        <span class="badge bg-info mt-1">{{ claim.verification_confidence or 'N/A' }}</span>
+      </div>
+
+      <h6 class="text-light mb-3">Answers Comparison (Admin Privileged View):</h6>
+      {% for item in answers_breakdown %}
+      <div class="p-3 bg-dark rounded border border-secondary mb-3">
+        <div class="fw-bold text-info small mb-1">Q: {{ item.question_text }}</div>
+        <div class="small text-success mb-1">Expected: {{ item.expected_answer }}</div>
+        <div class="small text-warning mb-1">Claimant: {{ item.claimant_answer }}</div>
+        <div class="small text-end text-muted">Similarity Score: <strong>{{ item.similarity_score }}%</strong></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Admin Decision Form -->
+<div class="card-custom p-4">
+  <h5 class="text-white mb-3"><i class="bi bi-gavel me-2"></i> Admin Decision</h5>
+  <form method="POST" action="{{ url_for('admin.review_claim', claim_id=claim.id) }}">
+    <div class="mb-3">
+      <label class="form-label text-muted">Admin Decision Notes</label>
+      <textarea name="admin_notes" class="form-control form-control-custom" rows="2" placeholder="Optional notes for claimant and audit log..."></textarea>
+    </div>
+    <div class="d-flex gap-3">
+      <button type="submit" name="action" value="approve" class="btn btn-success btn-lg px-4 fw-bold flex-grow-1">
+        <i class="bi bi-check-circle me-1"></i> Approve Claim & Confirm Match
+      </button>
+      <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg px-4 fw-bold flex-grow-1">
+        <i class="bi bi-x-circle me-1"></i> Reject Claim
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

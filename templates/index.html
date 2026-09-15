@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}FindIT — Intelligent Campus Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="row align-items-center py-5">
+  <div class="col-lg-7">
+    <h1 class="display-4 fw-bold text-white mb-3">
+      Reuniting Lost Items with Their Rightful Owners
+    </h1>
+    <p class="lead text-muted mb-4">
+      Powered by Member 2 Intelligent Matching Engine. TF-IDF text similarity, category matrix, location Haversine distance, temporal proximity, and private verification logic.
+    </p>
+    <div class="d-flex gap-3">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('report.create_lost') }}" class="btn btn-warning btn-lg px-4"><i class="bi bi-bag-x me-2"></i> Report Lost Item</a>
+        <a href="{{ url_for('report.create_found') }}" class="btn btn-success btn-lg px-4"><i class="bi bi-bag-check me-2"></i> Report Found Item</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-info btn-lg px-4 me-2">Get Started</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5 text-center mt-4 mt-lg-0">
+    <div class="card-custom p-4 text-start">
+      <h5 class="text-info border-bottom border-secondary pb-2"><i class="bi bi-cpu me-2"></i> Matching Engine Signals</h5>
+      <ul class="list-group list-group-flush bg-transparent">
+        <li class="list-group-item bg-transparent text-light border-secondary"><i class="bi bi-file-earmark-text text-primary me-2"></i> <strong>Text Similarity (40%)</strong> — TF-IDF & Cosine Similarity</li>
+        <li class="list-group-item bg-transparent text-light border-secondary"><i class="bi bi-tags text-success me-2"></i> <strong>Category Matching (20%)</strong> — Hierarchy & Synonyms</li>
+        <li class="list-group-item bg-transparent text-light border-secondary"><i class="bi bi-geo-alt text-warning me-2"></i> <strong>Location Distance (15%)</strong> — Haversine & Room Match</li>
+        <li class="list-group-item bg-transparent text-light border-secondary"><i class="bi bi-clock-history text-purple me-2"></i> <strong>Time Proximity (15%)</strong> — Temporal Decay Scorer</li>
+        <li class="list-group-item bg-transparent text-light border-secondary"><i class="bi bi-image text-danger me-2"></i> <strong>Image Processing (10%)</strong> — Perceptual dHash & Histogram</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

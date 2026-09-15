@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Register Account — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-md-6">
+    <div class="card-custom p-4 shadow">
+      <h3 class="text-white text-center mb-4"><i class="bi bi-person-plus text-info me-2"></i> Register Account</h3>
+      <form method="POST" action="{{ url_for('auth.register') }}">
+        <div class="mb-3">
+          <label class="form-label text-muted">Full Name</label>
+          <input type="text" name="full_name" class="form-control form-control-custom" required placeholder="e.g. John Doe">
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label text-muted">Username</label>
+            <input type="text" name="username" class="form-control form-control-custom" required placeholder="john_doe">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label text-muted">College Student ID</label>
+            <input type="text" name="college_id" class="form-control form-control-custom" placeholder="STU-2024-089">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted">College Email Address</label>
+          <input type="email" name="email" class="form-control form-control-custom" required placeholder="john@student.college.edu">
+        </div>
+        <div class="mb-4">
+          <label class="form-label text-muted">Password</label>
+          <input type="password" name="password" class="form-control form-control-custom" required placeholder="Create a strong password">
+        </div>
+        <button type="submit" class="btn btn-info w-100 py-2 fw-semibold">Create Account</button>
+      </form>
+      <div class="text-center mt-3 small text-muted">
+        Already registered? <a href="{{ url_for('auth.login') }}" class="text-info">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

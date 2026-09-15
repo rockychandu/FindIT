@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}My Claims — FindIT{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="text-white mb-1"><i class="bi bi-shield-check text-info me-2"></i> My Submitted Claims</h2>
+    <p class="text-muted mb-0">Track all your item claims and verification outcomes.</p>
+  </div>
+</div>
+
+<div class="card-custom p-4">
+  {% if claims %}
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0">
+      <thead>
+        <tr class="text-muted border-bottom border-secondary">
+          <th>Claim ID</th>
+          <th>Lost Item</th>
+          <th>Claim Date</th>
+          <th>Verification Score</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in claims %}
+        <tr>
+          <td class="fw-bold text-info">#{{ c.id }}</td>
+          <td class="text-white">{{ c.match.lost_report.item_name if c.match and c.match.lost_report else 'Item' }}</td>
+          <td class="text-muted small">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>
+            {% if c.verification_score is not none %}
+              <span class="fw-semibold text-warning">{{ c.verification_score }}%</span>
+              <small class="text-muted d-block">({{ c.verification_confidence }})</small>
+            {% else %}
+              <span class="text-muted">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-{{ 'success' if c.status == 'APPROVED' else ('danger' if c.status == 'REJECTED' else 'warning') }}">
+              {{ c.status }}
+            </span>
+          </td>
+          <td>
+            {% if c.status == 'SUBMITTED' %}
+              <a href="{{ url_for('claim.verify_claim_view', claim_id=c.id) }}" class="btn btn-warning btn-sm">Answer Verification</a>
+            {% else %}
+              <a href="{{ url_for('claim.claim_status_view', claim_id=c.id) }}" class="btn btn-outline-info btn-sm">View Status</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">You have not submitted any item claims yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Match Details — FindIT{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <a href="{{ url_for('match.possible_matches') }}" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-arrow-left"></i> Back to Matches</a>
+    <h2 class="text-white mb-0">Match Details <span class="text-muted fs-5">#{{ match.id }}</span></h2>
+  </div>
+  <div>
+    <span class="badge badge-{{ match.confidence_level|lower|replace('_', '-') }} fs-6">
+      {{ match.confidence_level }} CONFIDENCE ({{ match.overall_score }}%)
+    </span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Comparison Column -->
+  <div class="col-lg-7">
+    <div class="card-custom p-4 mb-4">
+      <h5 class="text-info mb-3"><i class="bi bi-arrows-angle-contract me-2"></i> Report Comparison</h5>
+      <div class="table-responsive">
+        <table class="table table-dark table-borderless align-middle mb-0">
+          <thead>
+            <tr class="border-bottom border-secondary text-muted">
+              <th>Attribute</th>
+              <th class="text-warning">My Lost Report</th>
+              <th class="text-success">Found Item</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-muted fw-semibold">Item Name</td>
+              <td class="text-white">{{ match.lost_report.item_name }}</td>
+              <td class="text-white">{{ match.found_report.item_name }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-semibold">Category</td>
+              <td>{{ match.lost_report.category.name if match.lost_report.category else 'N/A' }}</td>
+              <td>{{ match.found_report.category.name if match.found_report.category else 'N/A' }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-semibold">Description</td>
+              <td class="small">{{ match.lost_report.description }}</td>
+              <td class="small">{{ match.found_report.description }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-semibold">Brand / Color</td>
+              <td>{{ match.lost_report.brand or '-' }} / {{ match.lost_report.color or '-' }}</td>
+              <td>{{ match.found_report.brand or '-' }} / {{ match.found_report.color or '-' }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-semibold">Location</td>
+              <td>{{ match.lost_report.location_text }}</td>
+              <td>{{ match.found_report.location_text }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-semibold">Date & Time</td>
+              <td>{{ match.lost_report.lost_date }} {{ match.lost_report.lost_time or '' }}</td>
+              <td>{{ match.found_report.found_date }} {{ match.found_report.found_time or '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signal Breakdown & Action Column -->
+  <div class="col-lg-5">
+    <div class="card-custom p-4 mb-4">
+      <h5 class="text-info mb-3"><i class="bi bi-bar-chart-line me-2"></i> Match Score Breakdown</h5>
+      
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">TF-IDF Text Similarity (40%)</span>
+          <span class="fw-bold text-info">{{ match.text_score }}%</span>
+        </div>
+        <div class="signal-bar-container"><div class="signal-bar-fill fill-text" style="width: {{ match.text_score }}%;"></div></div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Category Hierarchy (20%)</span>
+          <span class="fw-bold text-success">{{ match.category_score }}%</span>
+        </div>
+        <div class="signal-bar-container"><div class="signal-bar-fill fill-category" style="width: {{ match.category_score }}%;"></div></div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Location Distance (15%)</span>
+          <span class="fw-bold text-warning">{{ match.location_score }}%</span>
+        </div>
+        <div class="signal-bar-container"><div class="signal-bar-fill fill-location" style="width: {{ match.location_score }}%;"></div></div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Time Proximity (15%)</span>
+          <span class="fw-bold text-purple">{{ match.time_score }}%</span>
+        </div>
+        <div class="signal-bar-container"><div class="signal-bar-fill fill-time" style="width: {{ match.time_score }}%;"></div></div>
+      </div>
+
+      {% if match.image_score is not none %}
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Local Image Similarity (10%)</span>
+          <span class="fw-bold text-danger">{{ match.image_score }}%</span>
+        </div>
+        <div class="signal-bar-container"><div class="signal-bar-fill fill-image" style="width: {{ match.image_score }}%;"></div></div>
+      </div>
+      {% endif %}
+
+      <div class="p-3 mt-4 bg-dark rounded border border-secondary text-center">
+        <div class="text-muted small">Calculated Overall Weighted Score</div>
+        <div class="display-6 fw-bold text-white mb-2">{{ match.overall_score }}%</div>
+        <form method="POST" action="{{ url_for('claim.api_submit_claim') }}">
+          <input type="hidden" name="match_id" value="{{ match.id }}">
+          <button type="submit" class="btn btn-warning w-100 py-2 fw-bold">
+            <i class="bi bi-shield-check me-1"></i> Proceed & Submit Claim
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

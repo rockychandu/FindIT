@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Possible Matches — FindIT{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="text-white mb-1"><i class="bi bi-diagram-3 text-info me-2"></i> Possible Matches</h2>
+    <p class="text-muted mb-0">Candidate matches ranked dynamically by the Member 2 Intelligent Matching Engine.</p>
+  </div>
+  <div>
+    <button id="btn-run-match" onclick="triggerMatchEngine({{ filter_report_id or 'null' }})" class="btn btn-outline-info">
+      <i class="bi bi-arrow-clockwise me-1"></i> Run Matching Engine
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card-custom p-3 mb-4">
+  <form method="GET" action="{{ url_for('match.possible_matches') }}" class="row g-2 align-items-center">
+    {% if filter_report_id %}
+      <input type="hidden" name="report_id" value="{{ filter_report_id }}">
+    {% endif %}
+    <div class="col-auto">
+      <label class="text-muted small me-2">Filter Confidence:</label>
+    </div>
+    <div class="col-auto">
+      <select name="confidence" class="form-select form-select-sm form-control-custom" onchange="this.form.submit()">
+        <option value="">All Confidence Levels</option>
+        <option value="HIGH" {% if request.args.get('confidence') == 'HIGH' %}selected{% endif %}>HIGH (80-100%)</option>
+        <option value="MEDIUM" {% if request.args.get('confidence') == 'MEDIUM' %}selected{% endif %}>MEDIUM (60-79%)</option>
+        <option value="LOW" {% if request.args.get('confidence') == 'LOW' %}selected{% endif %}>LOW (45-59%)</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+{% if matches %}
+<div class="row g-4">
+  {% for m in matches %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card-custom p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <span class="badge badge-{{ m.confidence_level|lower|replace('_', '-') }}">
+            {{ m.confidence_level }} ({{ m.overall_score }}%)
+          </span>
+          <span class="text-muted small">Match #{{ m.id }}</span>
+        </div>
+
+        <h5 class="text-white mb-2">{{ m.found_report.item_name }}</h5>
+        <p class="small text-muted mb-3"><i class="bi bi-geo-alt me-1"></i> Found at: {{ m.found_report.location_text }}</p>
+
+        <!-- Signal Score Breakdown Bars -->
+        <div class="small mb-3">
+          <div class="d-flex justify-content-between text-muted mb-1">
+            <span>Text Similarity</span>
+            <span>{{ m.text_score }}%</span>
+          </div>
+          <div class="signal-bar-container"><div class="signal-bar-fill fill-text" style="width: {{ m.text_score }}%;"></div></div>
+
+          <div class="d-flex justify-content-between text-muted mt-2 mb-1">
+            <span>Category Match</span>
+            <span>{{ m.category_score }}%</span>
+          </div>
+          <div class="signal-bar-container"><div class="signal-bar-fill fill-category" style="width: {{ m.category_score }}%;"></div></div>
+
+          <div class="d-flex justify-content-between text-muted mt-2 mb-1">
+            <span>Location Relevance</span>
+            <span>{{ m.location_score }}%</span>
+          </div>
+          <div class="signal-bar-container"><div class="signal-bar-fill fill-location" style="width: {{ m.location_score }}%;"></div></div>
+
+          <div class="d-flex justify-content-between text-muted mt-2 mb-1">
+            <span>Time Proximity</span>
+            <span>{{ m.time_score }}%</span>
+          </div>
+          <div class="signal-bar-container"><div class="signal-bar-fill fill-time" style="width: {{ m.time_score }}%;"></div></div>
+
+          {% if m.image_score is not none %}
+          <div class="d-flex justify-content-between text-muted mt-2 mb-1">
+            <span>Image Similarity</span>
+            <span>{{ m.image_score }}%</span>
+          </div>
+          <div class="signal-bar-container"><div class="signal-bar-fill fill-image" style="width: {{ m.image_score }}%;"></div></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="pt-3 border-top border-secondary d-flex gap-2">
+        <a href="{{ url_for('match.match_details', match_id=m.id) }}" class="btn btn-outline-info btn-sm flex-grow-1">
+          <i class="bi bi-eye me-1"></i> View Details
+        </a>
+        <form method="POST" action="{{ url_for('claim.api_submit_claim') }}" class="flex-grow-1">
+          <input type="hidden" name="match_id" value="{{ m.id }}">
+          <button type="submit" class="btn btn-warning btn-sm w-100">
+            <i class="bi bi-shield-check me-1"></i> Submit Claim
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card-custom p-5 text-center">
+  <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
+  <h4 class="text-white">No Suitable Matches Found</h4>
+  <p class="text-muted">The matching engine did not detect candidate items exceeding confidence thresholds.</p>
+</div>
+{% endif %}
+{% endblock %}

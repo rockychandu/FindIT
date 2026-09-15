@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FindIT — College Lost & Found{% endblock %}</title>
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+        <i class="bi bi-search-heart text-info fs-3"></i>
+        <span>FindIT</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+          {% if current_user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('report.dashboard') }}"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('match.possible_matches') }}"><i class="bi bi-diagram-3 me-1"></i> Possible Matches</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('claim.my_claims_view') }}"><i class="bi bi-shield-check me-1"></i> My Claims</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-plus-circle me-1"></i> Report Item</a>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="{{ url_for('report.create_lost') }}"><i class="bi bi-bag-x text-warning me-2"></i> Report Lost Item</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('report.create_found') }}"><i class="bi bi-bag-check text-success me-2"></i> Report Found Item</a></li>
+            </ul>
+          </li>
+          {% if current_user.is_admin %}
+          <li class="nav-item"><a class="nav-link text-warning" href="{{ url_for('admin.admin_dashboard') }}"><i class="bi bi-shield-lock me-1"></i> Admin Panel</a></li>
+          {% endif %}
+          {% endif %}
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          {% if current_user.is_authenticated %}
+          <!-- Notifications Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light btn-sm position-relative dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-bell"></i>
+              <span id="notif-unread-count" class="badge rounded-pill bg-danger notif-badge" style="display:none;"></span>
+            </button>
+            <ul id="notif-dropdown-list" class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" style="width: 320px; max-height: 400px; overflow-y: auto;">
+              <li><span class="dropdown-item text-muted">Loading notifications...</span></li>
+            </ul>
+          </div>
+
+          <div class="text-light small">
+            <i class="bi bi-person-circle me-1 text-info"></i> {{ current_user.full_name }}
+          </div>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
+          {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">Login</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-info btn-sm">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content -->
+  <main class="container my-4 flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer py-3 bg-dark text-muted border-top border-secondary text-center small mt-auto">
+    <div class="container">
+      FindIT &copy; 2026 — College Lost & Found Management System | Powered by Member 2 Intelligent Engine
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App JS -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

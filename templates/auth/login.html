@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-md-5">
+    <div class="card-custom p-4 shadow">
+      <h3 class="text-white text-center mb-4"><i class="bi bi-box-arrow-in-right text-info me-2"></i> Sign In to FindIT</h3>
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="mb-3">
+          <label class="form-label text-muted">Username or Email</label>
+          <input type="text" name="username" class="form-control form-control-custom" required autofocus placeholder="Enter username or email">
+        </div>
+        <div class="mb-4">
+          <label class="form-label text-muted">Password</label>
+          <input type="password" name="password" class="form-control form-control-custom" required placeholder="Enter password">
+        </div>
+        <button type="submit" class="btn btn-info w-100 py-2 fw-semibold">Sign In</button>
+      </form>
+      <div class="text-center mt-3 small text-muted">
+        Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-info">Register here</a>
+      </div>
+      <div class="mt-4 pt-3 border-top border-secondary text-center small text-muted">
+        <strong>Demo Accounts:</strong><br>
+        Admin: <code>admin</code> / <code>admin123</code><br>
+        Student: <code>john_doe</code> / <code>user123</code>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

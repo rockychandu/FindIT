@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Private Owner Verification — FindIT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card-custom p-4 shadow">
+      <h3 class="text-white mb-2"><i class="bi bi-shield-lock text-warning me-2"></i> Private Owner Verification</h3>
+      <p class="text-muted small mb-4">
+        To verify your ownership of this item, please answer the questions provided by the finder.
+        Your answers will be evaluated dynamically by the Member 2 Verification Engine.
+      </p>
+
+      {% if questions %}
+      <form method="POST" action="{{ url_for('claim.api_verify_claim', claim_id=claim.id) }}">
+        {% for q in questions %}
+        <div class="mb-4 p-3 bg-dark rounded border border-secondary">
+          <label class="form-label text-light fw-bold">
+            Question {{ q.question_order }}: {{ q.question_text }}
+          </label>
+          <textarea name="question_{{ q.id }}" class="form-control form-control-custom" rows="3" required placeholder="Type your answer here in detail..."></textarea>
+        </div>
+        {% endfor %}
+
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-warning py-2 fw-bold">
+            <i class="bi bi-check-circle me-1"></i> Submit Verification Answers
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <div class="alert alert-info border border-info text-light">
+        <i class="bi bi-info-circle me-2"></i> No specific verification questions were set by the finder for this item.
+        Click below to submit your claim directly for admin review.
+      </div>
+      <form method="POST" action="{{ url_for('claim.api_verify_claim', claim_id=claim.id) }}">
+        <button type="submit" class="btn btn-warning w-100 py-2 fw-bold">Submit Claim for Admin Review</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
