@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% block title %}Authority Case Review #{{ claim.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 1.5rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h1 class="page-title" style="margin: 0; font-size: 1.6rem; color: var(--primary);">Case Review: LF-2026-{{ "%06d"|format(claim.id) }}</h1>
+            <span class="badge {{ claim.status|status_badge }}" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">{{ claim.status }}</span>
+        </div>
+        <p class="page-subtitle" style="margin-top: 0.3rem;">College Authority Dual-Party Investigation & Match Decision Portal</p>
+    </div>
+    <div style="text-align: right;">
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Submitted: {{ claim.submitted_at.strftime('%b %d, %Y %I:%M %p') if claim.submitted_at else 'N/A' }}</span>
+    </div>
+</div>
+
+<!-- DUAL PARTY COMPARISON: LOST PERSON vs FOUND PERSON -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+
+    <!-- LOST PERSON CARD -->
+    <div class="card" style="border-top: 4px solid #8063F5;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+            <h3 class="card-title" style="margin: 0; color: #8063F5; display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                1. LOST PERSON (Claimant)
+            </h3>
+            <span class="badge badge-info" style="font-size: 0.75rem;">{{ claim.claimant.role }}</span>
+        </div>
+
+        <div style="background: var(--bg-canvas); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                <div><strong>Full Name:</strong> {{ claim.claimant.name }}</div>
+                <div><strong>Email:</strong> {{ claim.claimant.email }}</div>
+                <div style="grid-column: span 2; background: #E0E7FF; padding: 0.4rem 0.6rem; border-radius: 0.35rem; color: #3730A3; font-weight: 600;">
+                    📱 Mobile Number: <span style="font-family: monospace; font-size: 1rem;">{{ claim.claimant.mobile_number or 'Not provided' }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if lost_report %}
+        <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div><strong>Lost Report ID:</strong> <span style="font-family: monospace;">{{ lost_report.public_report_id }}</span></div>
+            <div><strong>Item Name:</strong> {{ lost_report.item_name }}</div>
+            <div><strong>Category:</strong> {{ lost_report.category.name if lost_report.category else 'N/A' }}</div>
+            <div><strong>Description:</strong> {{ lost_report.description }}</div>
+            <div><strong>Lost Location:</strong> {{ lost_report.location }}</div>
+            <div><strong>Lost Date / Time:</strong> {{ lost_report.date.strftime('%Y-%m-%d') if lost_report.date else '' }} {{ lost_report.time or '' }}</div>
+            <div><strong>Distinguishing Features:</strong> {{ lost_report.distinguishing_features or 'None specified' }}</div>
+            
+            {% if lost_report.images %}
+            <div style="margin-top: 0.5rem;">
+                <strong>Uploaded Photos:</strong>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.3rem; flex-wrap: wrap;">
+                    {% for img in lost_report.images %}
+                    <img src="{{ url_for('static', filename=img.image_path) }}" alt="Lost photo" style="width: 70px; height: 70px; object-fit: cover; border-radius: 0.35rem; border: 1px solid var(--border);">
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted); font-size: 0.88rem;">No linked lost item report found for this claimant.</p>
+        {% endif %}
+    </div>
+
+    <!-- FOUND PERSON CARD -->
+    <div class="card" style="border-top: 4px solid #F59E0B;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+            <h3 class="card-title" style="margin: 0; color: #D97706; display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                2. FOUND PERSON (Finder)
+            </h3>
+            <span class="badge badge-warning" style="font-size: 0.75rem;">{{ found_report.reporter.role if found_report.reporter else 'USER' }}</span>
+        </div>
+
+        <div style="background: var(--bg-canvas); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                <div><strong>Full Name:</strong> {{ found_report.reporter.name if found_report.reporter else 'Anonymous Finder' }}</div>
+                <div><strong>Email:</strong> {{ found_report.reporter.email if found_report.reporter else 'N/A' }}</div>
+                <div style="grid-column: span 2; background: #FEF3C7; padding: 0.4rem 0.6rem; border-radius: 0.35rem; color: #92400E; font-weight: 600;">
+                    📱 Mobile Number: <span style="font-family: monospace; font-size: 1rem;">{{ found_report.reporter.mobile_number if found_report.reporter else 'Not provided' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div><strong>Found Report ID:</strong> <span style="font-family: monospace;">{{ found_report.public_report_id }}</span></div>
+            <div><strong>Item Name:</strong> {{ found_report.item_name }}</div>
+            <div><strong>Category:</strong> {{ found_report.category.name if found_report.category else 'N/A' }}</div>
+            <div><strong>Description:</strong> {{ found_report.description }}</div>
+            <div><strong>Found Location:</strong> {{ found_report.location }}</div>
+            <div><strong>Found Date / Time:</strong> {{ found_report.date.strftime('%Y-%m-%d') if found_report.date else '' }} {{ found_report.time or '' }}</div>
+            
+            {% if found_report.images %}
+            <div style="margin-top: 0.5rem;">
+                <strong>Uploaded Photos:</strong>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.3rem; flex-wrap: wrap;">
+                    {% for img in found_report.images %}
+                    <img src="{{ url_for('static', filename=img.image_path) }}" alt="Found photo" style="width: 70px; height: 70px; object-fit: cover; border-radius: 0.35rem; border: 1px solid var(--border);">
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- MATCH CONFIDENCE & SCORE BREAKDOWN -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3 class="card-title" style="margin-bottom: 1rem;">🎯 Match Algorithm Score Breakdown</h3>
+    {% if match_record %}
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; text-align: center;">
+        <div style="background: #F8FAFC; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Text Similarity</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">{{ (match_record.text_score * 100)|round(1) }}%</div>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Category</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">{{ (match_record.category_score * 100)|round(1) }}%</div>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Location</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">{{ (match_record.location_score * 100)|round(1) }}%</div>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Time</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">{{ (match_record.time_score * 100)|round(1) }}%</div>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Image</div>
+            <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">{{ (match_record.image_score * 100)|round(1) }}%</div>
+        </div>
+        <div style="background: #ECFDF5; padding: 0.75rem; border-radius: 0.5rem; border: 2px solid var(--success);">
+            <div style="font-size: 0.75rem; color: #065F46; font-weight: 700; text-transform: uppercase;">Overall Match</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--success);">{{ (match_record.overall_score * 100)|round(1) }}%</div>
+        </div>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Direct manual claim without algorithmic pre-match score.</p>
+    {% endif %}
+</div>
+
+<!-- SIDE-BY-SIDE VERIFICATION ANSWERS REVIEW -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3 class="card-title" style="margin-bottom: 0.5rem;">🔒 Private Verification Answers Audit</h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+        Only college authorities can view this private verification comparison comparing the hidden expected answer registered by the lost person against the claimant's answer.
+    </p>
+
+    {% if qa_review_data %}
+    {% for item in qa_review_data %}
+    <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">Q{{ loop.index }}: {{ item.question }}</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem;">
+            <div style="background: #FEF2F2; border-left: 4px solid var(--danger); padding: 0.6rem 0.8rem; border-radius: 0.25rem;">
+                <small style="color: var(--danger); font-weight: 700; text-transform: uppercase;">Original Owner's Expected Answer:</small>
+                <div style="font-family: monospace; font-weight: 600; color: #991B1B; margin-top: 0.2rem;">{{ item.expected_answer }}</div>
+            </div>
+
+            <div style="background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 0.6rem 0.8rem; border-radius: 0.25rem;">
+                <small style="color: #1D4ED8; font-weight: 700; text-transform: uppercase;">Claimant's Submitted Answer:</small>
+                <div style="font-family: monospace; font-weight: 600; color: #1E40AF; margin-top: 0.2rem;">{{ item.claimant_response }}</div>
+            </div>
+        </div>
+
+        <div style="font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 0.4rem 0.75rem; border-radius: 0.25rem; border: 1px solid var(--border);">
+            <span>Text Match Confidence:</span>
+            <strong style="color: {{ 'var(--success)' if item.similarity_score >= 70 else ('var(--warning)' if item.similarity_score >= 40 else 'var(--danger)') }}; font-size: 1rem;">
+                {{ item.similarity_score }}% Match
+            </strong>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.9rem;">No specific verification questions were registered for this item.</p>
+    {% endif %}
+</div>
+
+<!-- CASE TIMELINE AUDIT LOG -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3 class="card-title" style="margin-bottom: 1rem;">⏱️ Case Audit Timeline</h3>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% if audit_events %}
+        {% for ev in audit_events %}
+        <div style="display: flex; gap: 1rem; align-items: flex-start; font-size: 0.88rem;">
+            <div style="min-width: 140px; color: var(--text-muted); font-family: monospace;">{{ ev.timestamp.strftime('%d %b %H:%M:%S') }}</div>
+            <div>
+                <span class="badge badge-info" style="font-size: 0.75rem;">{{ ev.action }}</span>
+                <span style="margin-left: 0.5rem; color: var(--text-main);">{{ ev.description }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="color: var(--text-muted); font-size: 0.88rem;">Timeline entries logged upon case action.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- AUTHORITY DECISION & HANDOVER ACTIONS PANEL -->
+<div class="card" style="background: #FAF8FF; border: 2px solid #8063F5;">
+    <h3 class="card-title" style="margin-bottom: 1rem; color: var(--primary);">⚖️ College Authority Final Decision Panel</h3>
+
+    {% if claim.status in ['SUBMITTED', 'UNDER_VERIFICATION', 'AWAITING_AUTHORITY_DECISION'] %}
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+        The authority is the single source of truth. Select a decision below. Approving will notify both lost & found parties and initiate physical handover.
+    </p>
+
+    <div style="display: flex; gap: 1rem;">
+        <button type="button" class="btn btn-success" style="flex: 1; padding: 0.85rem; font-size: 1rem; font-weight: 700;" onclick="document.getElementById('approveModal').style.display='flex'">
+            ✓ YES — GIVE ITEM TO LOST PERSON
+        </button>
+        <button type="button" class="btn btn-danger" style="flex: 1; padding: 0.85rem; font-size: 1rem; font-weight: 700;" onclick="document.getElementById('rejectModal').style.display='flex'">
+            ✗ NO — DO NOT GIVE ITEM TO LOST PERSON
+        </button>
+    </div>
+
+    {% elif claim.status == 'CLAIM_APPROVED' or handover %}
+    <div style="margin-bottom: 1.25rem; font-size: 0.92rem; background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+        <h4 style="margin-top: 0; color: var(--success);">✓ Claim Approved by Authority</h4>
+        <p style="margin-bottom: 0.5rem;"><strong>Decision Rationale:</strong> {{ claim.decision_reason }}</p>
+        
+        {% if handover %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: #F8FAFC; padding: 0.75rem; border-radius: 0.35rem; margin-top: 0.5rem;">
+            <div><strong>Handover Location:</strong> {{ handover.location }}</div>
+            <div><strong>Scheduled Date / Time:</strong> {{ handover.scheduled_date }} ({{ handover.scheduled_time }})</div>
+            <div><strong>Finder Submission Status:</strong> 
+                {% if handover.found_person_submitted %}
+                <span class="badge badge-success">✓ Finder Confirmed Submission</span>
+                {% else %}
+                <span class="badge badge-warning">Awaiting Finder Submission</span>
+                {% endif %}
+            </div>
+            <div><strong>Authority Received Status:</strong> 
+                {% if handover.authority_received %}
+                <span class="badge badge-success">✓ Authority Received Item</span>
+                {% else %}
+                <span class="badge badge-secondary">Pending Authority Receipt</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ADVANCED HANDOVER ACTIONS FOR AUTHORITY -->
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        {% if handover and not handover.authority_received %}
+        <form method="POST" action="{{ url_for('admin.claim_review', claim_id=claim.id) }}" style="flex: 1;">
+            <input type="hidden" name="action" value="receive_item">
+            <input type="hidden" name="notes" value="Item physically received at Lost & Found desk in good condition.">
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;" onclick="return confirm('Confirm that the finder has submitted the physical item to the authority office?')">
+                📥 ITEM RECEIVED FROM FOUND PERSON
+            </button>
+        </form>
+        {% endif %}
+
+        {% if handover and handover.authority_received and handover.status != 'COMPLETED' %}
+        <form method="POST" action="{{ url_for('admin.claim_review', claim_id=claim.id) }}" style="flex: 1;">
+            <input type="hidden" name="action" value="finalize_handover">
+            <input type="hidden" name="notes" value="Item physically handed to verified lost person upon college ID check.">
+            <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.75rem;" onclick="return confirm('Confirm that the physical item has been handed to the lost person?')">
+                🤝 ITEM HANDED TO LOST PERSON (CLOSE CASE)
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% elif claim.status == 'CLAIM_REJECTED' %}
+    <div style="background: #FEF2F2; padding: 1rem; border-radius: 0.5rem; border: 1px solid #FCA5A5; color: #991B1B;">
+        <h4 style="margin-top: 0;">✗ Claim Rejected by Authority</h4>
+        <p style="margin-bottom: 0;"><strong>Rejection Rationale:</strong> {{ claim.decision_reason }}</p>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- APPROVE MODAL -->
+<div id="approveModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: white; border-radius: 0.75rem; padding: 2rem; width: 90%; max-width: 550px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0; color: var(--primary);">Confirm Decision: YES — GIVE ITEM TO LOST PERSON</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+            You are confirming that this item belongs to <strong>{{ claim.claimant.name }}</strong> (Lost Person).
+        </p>
+        <form method="POST" action="{{ url_for('admin.claim_review', claim_id=claim.id) }}">
+            <input type="hidden" name="action" value="approve">
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label">Handover Location</label>
+                <input type="text" name="location" class="form-control" value="College Lost & Found Office (Main Admin Building)">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Scheduled Date</label>
+                    <input type="text" name="scheduled_date" class="form-control" value="Next Working Day">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Scheduled Time</label>
+                    <input type="text" name="scheduled_time" class="form-control" value="10:00 AM - 4:00 PM">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Authority Decision Rationale *</label>
+                <textarea name="decision_reason" class="form-control" placeholder="Provide decision note (e.g. Verification answers and item features match satisfactorily)..." required></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('approveModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-success">Confirm Approval</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div id="rejectModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999;">
+    <div style="background: white; border-radius: 0.75rem; padding: 2rem; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0; color: var(--danger);">Reject Claim: NO — DO NOT GIVE ITEM</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+            You are rejecting this claim by <strong>{{ claim.claimant.name }}</strong>.
+        </p>
+        <form method="POST" action="{{ url_for('admin.claim_review', claim_id=claim.id) }}">
+            <input type="hidden" name="action" value="reject">
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Reason for Rejection *</label>
+                <textarea name="decision_reason" class="form-control" placeholder="Verification information does not sufficiently prove ownership..." required></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
