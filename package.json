@@ -14,7 +14,7 @@
     "college"
   ],
   "author": "rockychandu",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "devDependencies": {
     "cssnano": "^6.0.0"
   }
