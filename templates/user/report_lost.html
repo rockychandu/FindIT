@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Report Lost Item{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Report Lost Item</h1>
+        <p class="page-subtitle">Provide accurate details and private verification criteria so FindIT can match and verify ownership.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('item.report_lost') }}" enctype="multipart/form-data">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="item_name">Item Name *</label>
+                <input type="text" id="item_name" name="item_name" class="form-control" placeholder="e.g. Leather Wallet, Blue Backpack, iPhone 14 Pro" value="{{ form.get('item_name', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="category_id">Category *</label>
+                <select id="category_id" name="category_id" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if form.get('category_id') == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Detailed Description *</label>
+            <textarea id="description" name="description" class="form-control" placeholder="Describe the item appearance, contents, stickers, condition, etc." required>{{ form.get('description', '') }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="color">Primary Color</label>
+                <input type="text" id="color" name="color" class="form-control" placeholder="e.g. Black, Navy Blue, Silver" value="{{ form.get('color', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="brand">Brand / Model</label>
+                <input type="text" id="brand" name="brand" class="form-control" placeholder="e.g. Fossil, Apple, Jansport" value="{{ form.get('brand', '') }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="distinguishing_features">Distinguishing Features</label>
+            <input type="text" id="distinguishing_features" name="distinguishing_features" class="form-control" placeholder="e.g. Scratch on top left, keychain attached, custom sticker" value="{{ form.get('distinguishing_features', '') }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="location">Lost Location *</label>
+                <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Central Library 2nd Floor, Science Block Room 102" value="{{ form.get('location', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="date">Lost Date *</label>
+                <input type="date" id="date" name="date" class="form-control" value="{{ form.get('date', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="time">Approx. Time</label>
+                <input type="time" id="time" name="time" class="form-control" value="{{ form.get('time', '') }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="image">Photograph (Optional, max 5MB)</label>
+            <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/png,image/webp">
+            <img id="image-preview" src="#" alt="Preview" style="display:none; max-height: 150px; margin-top: 0.5rem; border-radius: 0.25rem;">
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 2rem 0 1.5rem 0;">
+
+        <!-- PRIVATE VERIFICATION QUESTIONS SECTION -->
+        <div style="background-color: #F8FAFC; padding: 1.25rem; border-radius: 0.5rem; border: 1px dashed var(--accent); margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div>
+                    <h4 style="color: var(--primary); font-size: 1.05rem;">🔒 Private Verification Questions (Recommended)</h4>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">
+                        Add secret identifying questions. The <strong>expected answer is kept strictly hidden</strong>. 
+                        When someone claims a found item, they will be required to answer these questions for authority review.
+                    </p>
+                </div>
+                <button type="button" id="add-question-btn" class="btn btn-secondary btn-sm">+ Add Question</button>
+            </div>
+
+            <div id="questions-container">
+                <!-- Dynamic questions added via JS -->
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Lost Item Report</button>
+    </form>
+</div>
+{% endblock %}
