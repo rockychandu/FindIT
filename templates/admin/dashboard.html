@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Admin Portal Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Admin Portal & Authority Dashboard</h1>
+        <p class="page-subtitle">College Lost & Found authoritative control, verification reviews, and audit tracking.</p>
+    </div>
+</div>
+
+<!-- Real System Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="stat-card">
+        <div class="stat-label">Total Lost Reports</div>
+        <div class="stat-value" style="color: var(--danger);">{{ total_lost }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Found Reports</div>
+        <div class="stat-value" style="color: var(--info);">{{ total_found }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Awaiting Authority</div>
+        <div class="stat-value" style="color: var(--warning);">{{ pending_claims }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Approved Cases</div>
+        <div class="stat-value" style="color: var(--success);">{{ approved_cases }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Rejected Cases</div>
+        <div class="stat-value" style="color: var(--danger);">{{ rejected_cases }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pending Handover</div>
+        <div class="stat-value" style="color: var(--purple);">{{ pending_handovers }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Returned Items</div>
+        <div class="stat-value" style="color: var(--success);">{{ returned_items }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Closed Cases</div>
+        <div class="stat-value" style="color: var(--text-muted);">{{ closed_cases }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <div>
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 class="card-title">Pending Claims for Review</h3>
+                <a href="{{ url_for('admin.claims') }}" class="btn btn-secondary btn-sm">View All Claims</a>
+            </div>
+            {% if recent_claims %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Claim ID</th>
+                            <th>Found Item</th>
+                            <th>Claimant</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in recent_claims %}
+                        <tr>
+                            <td>#{{ c.id }}</td>
+                            <td><strong>{{ c.found_report.item_name }}</strong> ({{ c.found_report.public_report_id }})</td>
+                            <td>{{ c.claimant.name }}</td>
+                            <td><span class="badge {{ c.status|status_badge }}">{{ c.status }}</span></td>
+                            <td><a href="{{ url_for('admin.claim_review', claim_id=c.id) }}" class="btn btn-primary btn-sm">Review QA</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); font-size: 0.9rem;">No active claims requiring verification review.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <h3 class="card-title" style="margin-bottom: 1rem;">Recent System Audit Events</h3>
+            {% if recent_audit %}
+            <ul style="list-style: none;">
+                {% for a in recent_audit %}
+                <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.8rem;">
+                    <div><strong>{{ a.action }}</strong> by {{ a.user_name }}</div>
+                    <div style="color: var(--text-muted);">{{ a.description }}</div>
+                    <small style="color: #94A3B8;">{{ a.timestamp.strftime('%Y-%m-%d %H:%M') if a.timestamp else '' }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: var(--text-muted); font-size: 0.85rem;">No audit logs recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
