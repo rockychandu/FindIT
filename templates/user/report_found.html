@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Report Found Item{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Report Found Item</h1>
+        <p class="page-subtitle">Turn in or report an item found on campus. FindIT will run local matching against lost reports.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('item.report_found') }}" enctype="multipart/form-data">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="item_name">Item Name *</label>
+                <input type="text" id="item_name" name="item_name" class="form-control" placeholder="e.g. Leather Wallet, Scientific Calculator" value="{{ form.get('item_name', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="category_id">Category *</label>
+                <select id="category_id" name="category_id" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if form.get('category_id') == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">Detailed Description *</label>
+            <textarea id="description" name="description" class="form-control" placeholder="Describe the item general appearance, color, brand, condition..." required>{{ form.get('description', '') }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="color">Primary Color</label>
+                <input type="text" id="color" name="color" class="form-control" placeholder="e.g. Black, Brown" value="{{ form.get('color', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="brand">Brand / Model</label>
+                <input type="text" id="brand" name="brand" class="form-control" placeholder="e.g. Casio, Apple" value="{{ form.get('brand', '') }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="distinguishing_features">Visible Characteristics</label>
+            <input type="text" id="distinguishing_features" name="distinguishing_features" class="form-control" placeholder="e.g. Blue strap, clear case" value="{{ form.get('distinguishing_features', '') }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label" for="location">Found Location *</label>
+                <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Cafeteria Table 4, Student Center" value="{{ form.get('location', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="date">Found Date *</label>
+                <input type="date" id="date" name="date" class="form-control" value="{{ form.get('date', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="time">Approx. Time</label>
+                <input type="time" id="time" name="time" class="form-control" value="{{ form.get('time', '') }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="image">Photograph (Optional, max 5MB)</label>
+            <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/png,image/webp">
+            <img id="image-preview" src="#" alt="Preview" style="display:none; max-height: 150px; margin-top: 0.5rem; border-radius: 0.25rem;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Submit Found Item Report</button>
+    </form>
+</div>
+{% endblock %}
