@@ -1,0 +1,21 @@
+{
+  "name": "findit",
+  "version": "1.0.0",
+  "description": "College Lost & Found Management System",
+  "main": "run.py",
+  "scripts": {
+    "start": "python app.py",
+    "test": "pytest"
+  },
+  "keywords": [
+    "lost-and-found",
+    "flask",
+    "python",
+    "college"
+  ],
+  "author": "rockychandu",
+  "license": "MIT",
+  "devDependencies": {
+    "cssnano": "^6.0.0"
+  }
+}
