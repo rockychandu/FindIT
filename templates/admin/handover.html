@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Physical Handover{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Physical Item Handover Management</h1>
+        <p class="page-subtitle">Process physical returns for approved claims, verify identity in person, and transition item to RETURNED / CLOSED.</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 class="card-title" style="margin-bottom: 1rem; color: var(--purple);">Pending Physical Handovers</h3>
+    {% if pending_handovers %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Handover ID</th>
+                    <th>Approved Item</th>
+                    <th>Authorized Claimant</th>
+                    <th>Approval Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in pending_handovers %}
+                <tr>
+                    <td>#{{ h.id }}</td>
+                    <td>
+                        <strong>{{ h.report.item_name }}</strong><br>
+                        <small style="color: var(--text-muted);">{{ h.report.public_report_id }} ({{ h.report.location }})</small>
+                    </td>
+                    <td>
+                        <strong>{{ h.claimant.name }}</strong><br>
+                        <small style="color: var(--text-muted);">Email: {{ h.claimant.email }}</small><br>
+                        <small style="color: #8063F5; font-weight: 700;">Mobile: {{ h.claimant.mobile_number or 'N/A' }} | User ID: STU-{{ "%04d"|format(h.claimant.id) }}</small>
+                    </td>
+                    <td>{{ h.handover_date.strftime('%Y-%m-%d') if h.handover_date else '' }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.handover') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="hidden" name="handover_id" value="{{ h.id }}">
+                            <input type="text" name="notes" class="form-control" style="font-size: 0.85rem; padding: 0.35rem 0.6rem;" placeholder="e.g. Student ID #9842 verified" required>
+                            <button type="submit" class="btn btn-success btn-sm" style="white-space: nowrap;">Mark Handover Complete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.9rem;">No pending physical handovers waiting for execution.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3 class="card-title" style="margin-bottom: 1rem; color: var(--success);">Completed Handovers History</h3>
+    {% if completed_handovers %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Handover ID</th>
+                    <th>Returned Item</th>
+                    <th>Claimant</th>
+                    <th>Authorized By</th>
+                    <th>Completion Date</th>
+                    <th>Admin Verification Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ch in completed_handovers %}
+                <tr>
+                    <td>#{{ ch.id }}</td>
+                    <td><strong>{{ ch.report.item_name }}</strong> ({{ ch.report.public_report_id }})</td>
+                    <td>{{ ch.claimant.name }}</td>
+                    <td>{{ ch.authorizer.name if ch.authorizer else 'Admin' }}</td>
+                    <td>{{ ch.handover_date.strftime('%Y-%m-%d %H:%M') if ch.handover_date else '' }}</td>
+                    <td><span style="font-size: 0.85rem; color: var(--text-main);">{{ ch.notes }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-size: 0.9rem;">No completed handovers recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
