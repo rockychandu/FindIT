@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FindIT{% endblock %} - College Lost & Found Management System</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- 2-Second Animated Splash Overlay (Strict 3 Scenarios: Initial Entry, Signup, Logout) -->
+    <div id="findit-splash-screen" class="splash-overlay" style="background-color: #FFFFFF !important; background: #FFFFFF !important;">
+        <div class="splash-content" style="background-color: #FFFFFF !important; background: #FFFFFF !important;">
+            <div class="splash-logo-wrapper" style="background-color: #FFFFFF !important; background: #FFFFFF !important;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="FindIT Logo" class="splash-logo">
+            </div>
+            <div class="splash-tagline" style="color: #161730; font-weight: 800;">Lost • Found • Together</div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            {% if current_user %}
+            <button id="sidebar-toggle" class="btn btn-secondary btn-sm" style="padding: 0.35rem 0.65rem;" title="Toggle Navigation Menu">
+                ☰ Menu
+            </button>
+            {% endif %}
+            <a href="{{ url_for('main.dashboard') if current_user else url_for('main.index') }}" class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="FindIT Logo">
+                <span style="font-weight: 800; font-size: 1.3rem;">FindIT</span>
+                <span style="font-size: 0.95rem; font-weight: 500; color: #8063F5; margin-left: 0.5rem;">• Lost • Found • Together</span>
+            </a>
+        </div>
+
+        <div class="nav-user">
+            {% if current_user %}
+                {% if not current_user.is_admin %}
+                <a href="{{ url_for('main.notifications') }}" class="notif-btn" title="Notifications">
+                    🔔
+                    {% if unread_notifications_count > 0 %}
+                    <span class="notif-count">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+                {% endif %}
+                <span class="user-badge">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    {{ current_user.name }} ({{ current_user.role }})
+                </span>
+                <a href="{{ url_for('auth.logout') }}" class="btn logout-btn">Logout</a>
+            {% else %}
+                <!-- Top Right Profile & Portal Logins Dropdown for Guest -->
+                <div class="profile-dropdown-container" style="position: relative; display: inline-block;">
+                    <button id="profile-dropdown-btn" class="btn btn-sm" style="background: #FFFFFF; color: #161730; border: 1.5px solid #D8D2F8; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.85rem; border-radius: 9999px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <svg width="18" height="18" fill="#8063F5" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span>Profile & Logins ▾</span>
+                    </button>
+                    <div id="profile-dropdown-menu" style="display: none; position: absolute; right: 0; top: 120%; background: #FFFFFF; min-width: 220px; box-shadow: 0 10px 25px rgba(22, 23, 48, 0.15); border-radius: 0.75rem; border: 1px solid #E5E0D8; padding: 0.5rem 0; z-index: 9999;">
+                        <div style="font-size: 0.72rem; font-weight: 800; color: #8063F5; text-transform: uppercase; padding: 0.4rem 1rem 0.2rem 1rem; letter-spacing: 0.5px;">Select Portal / Login</div>
+                        <a href="{{ url_for('item.report_lost') }}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; color: #161730; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                            <span>🔍</span> Lost Portal
+                        </a>
+                        <a href="{{ url_for('item.report_found') }}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; color: #161730; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                            <span>🎁</span> Found Portal
+                        </a>
+                        <div style="height: 1px; background: #E5E0D8; margin: 0.3rem 0;"></div>
+                        <a href="{{ url_for('auth.authority_login') }}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; color: #161730; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                            <span>🏛️</span> Admin / Authority Login
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('item.report_lost') }}" class="btn btn-purple btn-sm">🔍 Lost Portal</a>
+                <a href="{{ url_for('item.report_found') }}" class="btn btn-sm" style="background: #FF8A00; color: #FFFFFF;">🎁 Found Portal</a>
+                <a href="{{ url_for('auth.authority_login') }}" class="btn btn-primary btn-sm" style="background: #161730; color: #FFFFFF;">🏛️ Authority Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main App Wrapper with Left Sidebar Scrollbar Options -->
+    <div class="app-layout">
+        {% if current_user %}
+        <aside id="sidebar-menu" class="sidebar">
+            <div class="sidebar-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="sidebar-logo">
+                    <div>
+                        <div style="font-weight: 800; font-size: 1.1rem; color: #FFFFFF;">FindIT</div>
+                        <div style="font-size: 0.7rem; color: #8063F5; font-weight: 700;">Lost • Found • Together</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                {% if current_user.is_admin %}
+                <div class="sidebar-section-label">Menu</div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: #CBD5E1; padding: 0.2rem 0.75rem;">≡ FindIT Menu</div>
+                
+                <div class="sidebar-section-label" style="margin-top: 0.75rem;">Authority Navigation</div>
+                <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                    <span>📊</span> Authority Dashboard
+                </a>
+                <a href="{{ url_for('admin.claims') }}" class="sidebar-link {% if request.endpoint in ['admin.claims', 'admin.claim_review'] %}active{% endif %}">
+                    <span>⚖️</span> Case Decisions & Dual Review
+                </a>
+                <a href="{{ url_for('admin.reports') }}" class="sidebar-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
+                    <span>📋</span> All Campus Reports Catalog
+                </a>
+                <a href="{{ url_for('admin.matches') }}" class="sidebar-link {% if request.endpoint == 'admin.matches' %}active{% endif %}">
+                    <span>🧩</span> System Matches
+                </a>
+                <a href="{{ url_for('admin.handover') }}" class="sidebar-link {% if request.endpoint == 'admin.handover' %}active{% endif %}">
+                    <span>🤝</span> Physical Handovers
+                </a>
+                <a href="{{ url_for('admin.audit') }}" class="sidebar-link {% if request.endpoint == 'admin.audit' %}active{% endif %}">
+                    <span>📜</span> System Audit History
+                </a>
+                
+                <div class="sidebar-section-label" style="margin-top: 1rem;">Data Exports</div>
+                <a href="{{ url_for('admin.export_reports_csv') }}" class="sidebar-link"><span>📥</span> Export Reports CSV</a>
+                <a href="{{ url_for('admin.export_audit_csv') }}" class="sidebar-link"><span>📥</span> Export Audit Logs CSV</a>
+                {% else %}
+                <div class="sidebar-section-label">Menu</div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: #CBD5E1; padding: 0.2rem 0.75rem;">≡ FindIT Menu</div>
+
+                <div class="sidebar-section-label" style="margin-top: 0.75rem;">Main Navigation</div>
+                <a href="{{ url_for('main.dashboard') }}" class="sidebar-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+                    <span>👤</span> User Dashboard
+                </a>
+                <a href="{{ url_for('item.report_lost') }}" class="sidebar-link {% if request.endpoint == 'item.report_lost' %}active{% endif %}">
+                    <span>⊕</span> Report Lost Item
+                </a>
+                <a href="{{ url_for('item.report_found') }}" class="sidebar-link {% if request.endpoint == 'item.report_found' %}active{% endif %}">
+                    <span>⊕</span> Report Found Item
+                </a>
+                <a href="{{ url_for('main.reports') }}" class="sidebar-link {% if request.endpoint == 'main.reports' %}active{% endif %}">
+                    <span>🔍</span> Campus Reports Catalog
+                </a>
+                <a href="{{ url_for('item.matches') }}" class="sidebar-link {% if request.endpoint == 'item.matches' %}active{% endif %}">
+                    <span>📊</span> Possible Matches
+                </a>
+                <a href="{{ url_for('claim.my_claims') }}" class="sidebar-link {% if request.endpoint in ['claim.my_claims', 'claim.case_status'] %}active{% endif %}">
+                    <span>📑</span> My Claims Status
+                </a>
+                <a href="{{ url_for('main.notifications') }}" class="sidebar-link {% if request.endpoint == 'main.notifications' %}active{% endif %}">
+                    <span>🔔</span> Notifications {% if unread_notifications_count > 0 %}<span class="badge badge-purple" style="margin-left: auto;">{{ unread_notifications_count }}</span>{% endif %}
+                </a>
+                {% endif %}
+            </nav>
+        </aside>
+        {% endif %}
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 <strong>FindIT</strong> - Official College Lost & Found Management System. Lost & Found • Made Easy.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
