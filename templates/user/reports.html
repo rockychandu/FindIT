@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}All Campus Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Campus Reports & Items Catalog</h1>
+        <p class="page-subtitle">Search, filter, and inspect registered lost and found reports.</p>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card" style="margin-bottom: 2rem;">
+    <form method="GET" action="{{ url_for('main.reports') }}" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Search Keyword</label>
+            <input type="text" name="q" class="form-control" placeholder="Search item, ID, description..." value="{{ query or '' }}">
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Report Type</label>
+            <select name="type" class="form-control">
+                <option value="">All Types</option>
+                <option value="LOST" {% if selected_type == 'LOST' %}selected{% endif %}>Lost Items</option>
+                <option value="FOUND" {% if selected_type == 'FOUND' %}selected{% endif %}>Found Items</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Category</label>
+            <select name="category_id" class="form-control">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control" placeholder="e.g. Library" value="{{ location or '' }}">
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Item Grid -->
+{% if reports %}
+<div class="grid">
+    {% for item in reports %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+                <span class="badge {{ 'badge-danger' if item.report_type == 'LOST' else 'badge-info' }}">{{ item.report_type }}</span>
+                <span class="badge {{ item.status|status_badge }}">{{ item.status }}</span>
+            </div>
+            <strong style="font-size: 0.85rem; color: var(--text-muted);">{{ item.public_report_id }}</strong>
+        </div>
+
+        {% if item.images %}
+        <div style="margin: 0.75rem 0; text-align: center; background: #f1f5f9; border-radius: 0.375rem; padding: 0.5rem;">
+            <img src="{{ url_for('static', filename=item.images[0].file_path) }}" alt="{{ item.item_name }}" style="max-height: 140px; max-width: 100%; object-fit: contain;">
+        </div>
+        {% endif %}
+
+        <h3 class="card-title" style="margin-top: 0.5rem;">{{ item.item_name }}</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; height: 40px; overflow: hidden;">
+            {{ item.description }}
+        </p>
+
+        <div class="card-meta" style="flex-direction: column; gap: 0.25rem;">
+            <div>📍 <strong>Location:</strong> {{ item.location }}</div>
+            <div>📅 <strong>Date:</strong> {{ item.date }}</div>
+            <div>🏷️ <strong>Category:</strong> {{ item.category.name }}</div>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('item.view_report', report_id=item.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">View Details</a>
+            {% if item.report_type == 'FOUND' and item.user_id != current_user.id and item.status not in ['CLAIM_APPROVED', 'HANDOVER_PENDING', 'RETURNED', 'CLOSED'] %}
+            <a href="{{ url_for('claim.submit_claim_page', found_report_id=item.id) }}" class="btn btn-primary btn-sm">Claim Item</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted); font-size: 1rem;">No reports found matching your filter criteria.</p>
+</div>
+{% endif %}
+{% endblock %}

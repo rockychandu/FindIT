@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Notice - {{ report.public_report_id }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #fff; color: #2D0A14; }
+        .notice-card { max-width: 750px; margin: 0 auto; border: 4px solid #70122B; padding: 30px; border-radius: 12px; background: #FAF8F5; position: relative; }
+        .header { text-align: center; border-bottom: 3px double #D4AF37; padding-bottom: 20px; margin-bottom: 20px; }
+        .logo { max-height: 150px; }
+        .notice-type { font-size: 2.2rem; font-weight: 800; color: #70122B; text-transform: uppercase; margin: 10px 0; letter-spacing: 2px; }
+        .item-title { font-size: 1.8rem; font-weight: 700; color: #70122B; margin-bottom: 15px; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 1.1rem; margin-bottom: 20px; }
+        .photo-container { text-align: center; margin: 20px 0; background: #fff; border: 1px solid #E6DFD5; padding: 10px; border-radius: 8px; }
+        .photo { max-height: 250px; max-width: 100%; object-fit: contain; }
+        .contact-box { background: #70122B; color: #F4E8C1; padding: 15px; text-align: center; border-radius: 8px; font-size: 1.2rem; font-weight: 700; margin-top: 30px; border: 2px solid #D4AF37; }
+        .print-btn { display: block; margin: 20px auto; padding: 12px 25px; font-size: 1.1rem; background: #D4AF37; color: #70122B; font-weight: 800; border: none; border-radius: 6px; cursor: pointer; }
+        @media print { .print-btn { display: none; } }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-btn">🖨️ Print / Save PDF Campus Notice</button>
+
+    <div class="notice-card">
+        <div class="header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="FindIT Logo" class="logo">
+            <div class="notice-type">CAMPUS {{ report.report_type }} ITEM NOTICE</div>
+            <div style="font-weight: 600; color: #7A6B70;">Report ID: {{ report.public_report_id }}</div>
+        </div>
+
+        <div class="item-title">{{ report.item_name }}</div>
+
+        {% if report.images %}
+        <div class="photo-container">
+            <img src="{{ url_for('static', filename=report.images[0].file_path) }}" alt="{{ report.item_name }}" class="photo">
+        </div>
+        {% endif %}
+
+        <div class="meta-grid">
+            <div>📍 <strong>Location:</strong> {{ report.location }}</div>
+            <div>📅 <strong>Date:</strong> {{ report.date }}</div>
+            <div>🏷️ <strong>Category:</strong> {{ report.category.name }}</div>
+            <div>🎨 <strong>Color / Brand:</strong> {{ report.color or 'N/A' }} / {{ report.brand or 'N/A' }}</div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <strong style="font-size: 1.1rem; color: #70122B;">Description & Details:</strong>
+            <p style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #E6DFD5; font-size: 1rem;">{{ report.description }}</p>
+        </div>
+
+        <div class="contact-box">
+            If you have any information or wish to claim this item, please visit the <strong>College Lost & Found Office</strong> or submit an online claim via FindIT (Report ID: {{ report.public_report_id }}).
+        </div>
+    </div>
+</body>
+</html>

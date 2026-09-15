@@ -78,16 +78,16 @@ body {
 
 .splash-logo-wrapper {
   position: relative;
-  width: 180px;
-  height: 180px;
+  width: 250px;
+  height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .splash-logo {
-  max-width: 160px;
-  max-height: 160px;
+  max-width: 230px;
+  max-height: 230px;
   object-fit: contain;
   animation: logoFadeScale 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -133,7 +133,7 @@ body {
 }
 
 .navbar-brand img {
-  height: 38px;
+  height: 54px;
   width: auto;
   object-fit: contain;
 }
@@ -229,7 +229,7 @@ body {
 }
 
 .sidebar-logo {
-  height: 48px;
+  height: 64px;
   width: auto;
   object-fit: contain;
 }

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Admin - System Matches{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Calculated System Matches</h1>
+        <p class="page-subtitle">Inspect local algorithmic similarity scoring breakdowns generated between lost and found reports.</p>
+    </div>
+</div>
+
+{% if matches %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Match ID</th>
+                <th>Lost Report</th>
+                <th>Found Report</th>
+                <th>Category Score</th>
+                <th>Text Similarity</th>
+                <th>Location Rel.</th>
+                <th>Time Rel.</th>
+                <th>Overall Similarity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in matches %}
+            <tr>
+                <td>#{{ m.id }}</td>
+                <td>
+                    <strong>{{ m.lost_report.item_name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ m.lost_report.public_report_id }} ({{ m.lost_report.reporter.name }})</small>
+                </td>
+                <td>
+                    <strong>{{ m.found_report.item_name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ m.found_report.public_report_id }} ({{ m.found_report.reporter.name }})</small>
+                </td>
+                <td>{{ (m.category_score * 100)|round(0) }}%</td>
+                <td>{{ (m.text_score * 100)|round(1) }}%</td>
+                <td>{{ (m.location_score * 100)|round(1) }}%</td>
+                <td>{{ (m.time_score * 100)|round(1) }}%</td>
+                <td><strong style="color: var(--accent); font-size: 1.1rem;">{{ (m.overall_score * 100)|round(1) }}%</strong></td>
+                <td><span class="badge {{ m.status|status_badge }}">{{ m.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted);">No system match calculations stored in database.</p>
+</div>
+{% endif %}
+{% endblock %}

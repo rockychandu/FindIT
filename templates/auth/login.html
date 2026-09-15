@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div style="max-width: 450px; margin: 3rem auto;">
+    <div class="card">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="FindIT Logo" style="max-height: 160px; width: auto; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 8px rgba(112, 18, 43, 0.2));">
+            <h2 class="card-title" style="font-size: 1.6rem; color: var(--primary);">Sign In to FindIT</h2>
+            <p class="page-subtitle">College Lost & Found Portal • Made Easy</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label class="form-label" for="email">Campus Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="student@college.edu" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+            Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: var(--accent); font-weight: 600;">Register Here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

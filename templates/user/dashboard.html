@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+    <div>
+        <h1 class="page-header-title">Welcome, {{ user.name }}</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Track your reports, view potential item matches, and manage claim statuses.</p>
+    </div>
+    <div style="font-size: 1.1rem; font-weight: 700; color: #8063F5; font-family: monospace;">
+        {{ current_time_str if current_time_str else '13:34, 15-09-2026' }}
+    </div>
+</div>
+
+<!-- Mockup Stat Cards Grid (4 Side-by-Side Cards) -->
+<div class="mockup-stats-grid">
+    <!-- Card 1: My Lost Items (Violet) -->
+    <div class="stat-card-lost">
+        <svg class="stat-card-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+            <rect x="16" y="22" width="32" height="34" rx="8" stroke="currentColor" stroke-width="3" fill="none"/>
+            <path d="M24 22V14C24 9.58172 27.5817 6 32 6V6C36.4183 6 40 9.58172 40 14V22" stroke="currentColor" stroke-width="3"/>
+            <rect x="24" y="32" width="16" height="12" rx="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <div class="stat-card-num">{{ my_lost|length }}</div>
+        <div class="stat-card-title">My Lost Items</div>
+    </div>
+
+    <!-- Card 2: My Found Items (Orange) -->
+    <div class="stat-card-found">
+        <svg class="stat-card-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+            <rect x="16" y="22" width="32" height="34" rx="8" stroke="currentColor" stroke-width="3" fill="none"/>
+            <path d="M24 22V14C24 9.58172 27.5817 6 32 6V6C36.4183 6 40 9.58172 40 14V22" stroke="currentColor" stroke-width="3"/>
+            <rect x="24" y="32" width="16" height="12" rx="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <div class="stat-card-num">{{ my_found|length }}</div>
+        <div class="stat-card-title">My Found Items</div>
+    </div>
+
+    <!-- Card 3: Possible Matches (Lavender) -->
+    <div class="stat-card-matches">
+        <svg class="stat-card-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+            <rect x="16" y="22" width="32" height="34" rx="8" stroke="currentColor" stroke-width="3" fill="none"/>
+            <path d="M24 22V14C24 9.58172 27.5817 6 32 6V6C36.4183 6 40 9.58172 40 14V22" stroke="currentColor" stroke-width="3"/>
+            <circle cx="44" cy="18" r="9" fill="#161730"/>
+            <text x="44" y="22" font-size="11" font-weight="bold" fill="#FFF" text-anchor="middle">?</text>
+        </svg>
+        <div class="stat-card-num">{{ my_matches|length }}</div>
+        <div class="stat-card-title">Possible Matches</div>
+    </div>
+
+    <!-- Card 4: Active Claims (Dark Navy) -->
+    <div class="stat-card-claims">
+        <svg class="stat-card-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor">
+            <rect x="16" y="22" width="32" height="34" rx="8" stroke="currentColor" stroke-width="3" fill="none"/>
+            <path d="M24 22V14C24 9.58172 27.5817 6 32 6V6C36.4183 6 40 9.58172 40 14V22" stroke="currentColor" stroke-width="3"/>
+            <circle cx="44" cy="18" r="9" fill="#8063F5"/>
+            <path d="M40 18L43 21L48 15" stroke="#FFF" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="stat-card-num">{{ my_claims|length }}</div>
+        <div class="stat-card-title">Active Claims</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <div>
+        <!-- My Lost Items -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 class="card-title" style="font-size: 1.15rem; color: #161730;">My Lost Item Reports</h3>
+                <a href="{{ url_for('item.report_lost') }}" class="btn btn-primary" style="background-color: #161730; border-radius: 0.5rem; padding: 0.45rem 1.1rem; font-size: 0.85rem;">My Lost Report</a>
+            </div>
+            {% if my_lost %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Photo</th>
+                            <th>Item Name</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in my_lost %}
+                        <tr>
+                            <td><strong>{{ item.public_report_id }}</strong></td>
+                            <td>
+                                {% if item.images %}
+                                <img src="{{ url_for('static', filename=item.images[0].file_path) }}" alt="Photo" style="width: 45px; height: 45px; object-fit: cover; border-radius: 0.35rem; border: 1px solid var(--border-color);">
+                                {% else %}
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">📷 No Photo</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ item.item_name }}</strong></td>
+                            <td>{{ item.location }}</td>
+                            <td>{{ item.date }}</td>
+                            <td><span class="badge {{ item.status|status_badge }}">{{ item.status }}</span></td>
+                            <td><a href="{{ url_for('item.view_report', report_id=item.id) }}" class="btn btn-secondary btn-sm">Details</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); font-size: 0.9rem;">You have not reported any lost items yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- My Found Items -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 class="card-title" style="font-size: 1.15rem; color: #161730;">My Found Item Reports</h3>
+                <a href="{{ url_for('item.report_found') }}" class="btn btn-purple" style="border-radius: 0.5rem; padding: 0.45rem 1.1rem; font-size: 0.85rem;">My Found Item</a>
+            </div>
+            {% if my_found %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Photo</th>
+                            <th>Item Name</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in my_found %}
+                        <tr>
+                            <td><strong>{{ item.public_report_id }}</strong></td>
+                            <td>
+                                {% if item.images %}
+                                <img src="{{ url_for('static', filename=item.images[0].file_path) }}" alt="Photo" style="width: 45px; height: 45px; object-fit: cover; border-radius: 0.35rem; border: 1px solid var(--border-color);">
+                                {% else %}
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">📷 No Photo</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ item.item_name }}</strong></td>
+                            <td>{{ item.location }}</td>
+                            <td>{{ item.date }}</td>
+                            <td><span class="badge {{ item.status|status_badge }}">{{ item.status }}</span></td>
+                            <td><a href="{{ url_for('item.view_report', report_id=item.id) }}" class="btn btn-secondary btn-sm">Details</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); font-size: 0.9rem;">You have not turned in or reported any found items.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <!-- Recent Notifications -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div style="background-color: #8063F5; color: #FFFFFF; padding: 0.85rem 1.25rem; font-weight: 700; font-size: 1.05rem;">
+                Notifications
+            </div>
+            <div style="padding: 1.25rem;">
+                {% if notifications %}
+                    <ul style="list-style: none;">
+                    {% for n in notifications[:5] %}
+                        <li style="padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+                            <div style="font-weight: 600; color: var(--primary);">{{ n.message }}</div>
+                            <small style="color: var(--text-muted);">{{ n.created_at.strftime('%Y-%m-%d %H:%M') if n.created_at else '' }}</small>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">No recent notifications.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

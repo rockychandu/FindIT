@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Manage Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Manage Campus Reports</h1>
+        <p class="page-subtitle">Inspect all user-submitted lost and found records across campus.</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <form method="GET" action="{{ url_for('admin.reports') }}" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group" style="margin: 0; flex: 2;">
+            <label class="form-label">Search Query</label>
+            <input type="text" name="q" class="form-control" placeholder="Public ID, Item Name, Location..." value="{{ query or '' }}">
+        </div>
+
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label class="form-label">Type</label>
+            <select name="type" class="form-control">
+                <option value="">All Types</option>
+                <option value="LOST" {% if selected_type == 'LOST' %}selected{% endif %}>LOST</option>
+                <option value="FOUND" {% if selected_type == 'FOUND' %}selected{% endif %}>FOUND</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="REPORTED_LOST" {% if selected_status == 'REPORTED_LOST' %}selected{% endif %}>REPORTED_LOST</option>
+                <option value="REPORTED_FOUND" {% if selected_status == 'REPORTED_FOUND' %}selected{% endif %}>REPORTED_FOUND</option>
+                <option value="POSSIBLE_MATCH" {% if selected_status == 'POSSIBLE_MATCH' %}selected{% endif %}>POSSIBLE_MATCH</option>
+                <option value="CLAIM_SUBMITTED" {% if selected_status == 'CLAIM_SUBMITTED' %}selected{% endif %}>CLAIM_SUBMITTED</option>
+                <option value="HANDOVER_PENDING" {% if selected_status == 'HANDOVER_PENDING' %}selected{% endif %}>HANDOVER_PENDING</option>
+                <option value="RETURNED" {% if selected_status == 'RETURNED' %}selected{% endif %}>RETURNED</option>
+                <option value="CLOSED" {% if selected_status == 'CLOSED' %}selected{% endif %}>CLOSED</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Photo</th>
+                <th>Type</th>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Reporter</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in reports %}
+            <tr>
+                <td><strong>{{ r.public_report_id }}</strong></td>
+                <td>
+                    {% if r.images %}
+                    <img src="{{ url_for('static', filename=r.images[0].file_path) }}" alt="Photo" style="width: 45px; height: 45px; object-fit: cover; border-radius: 0.35rem; border: 1px solid var(--border-color);">
+                    {% else %}
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">📷 No Photo</span>
+                    {% endif %}
+                </td>
+                <td><span class="badge {{ 'badge-danger' if r.report_type == 'LOST' else 'badge-info' }}">{{ r.report_type }}</span></td>
+                <td><strong>{{ r.item_name }}</strong></td>
+                <td>{{ r.category.name }}</td>
+                <td>{{ r.reporter.name }}</td>
+                <td>{{ r.location }}</td>
+                <td>{{ r.date }}</td>
+                <td><span class="badge {{ r.status|status_badge }}">{{ r.status }}</span></td>
+                <td><a href="{{ url_for('item.view_report', report_id=r.id) }}" class="btn btn-secondary btn-sm">Inspect</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

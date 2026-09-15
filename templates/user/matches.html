@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Possible Matches{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Possible Item Matches</h1>
+        <p class="page-subtitle">Algorithmic matches calculated from actual report data across text, category, location, and time similarity.</p>
+    </div>
+</div>
+
+{% if matches %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Your Lost Item</th>
+                <th>Matched Found Item</th>
+                <th>Category</th>
+                <th>Text Similarity</th>
+                <th>Location Rel.</th>
+                <th>Time Rel.</th>
+                <th>Overall Match Score</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in matches %}
+            <tr>
+                <td>
+                    <strong>{{ m.lost_report.item_name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ m.lost_report.public_report_id }}</small>
+                </td>
+                <td>
+                    <strong>{{ m.found_report.item_name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ m.found_report.public_report_id }} ({{ m.found_report.location }})</small>
+                </td>
+                <td><span class="badge badge-info">{{ m.lost_report.category.name }}</span></td>
+                <td>{{ (m.text_score * 100)|round(1) }}%</td>
+                <td>{{ (m.location_score * 100)|round(1) }}%</td>
+                <td>{{ (m.time_score * 100)|round(1) }}%</td>
+                <td>
+                    <strong style="color: var(--accent); font-size: 1.1rem;">{{ (m.overall_score * 100)|round(1) }}%</strong>
+                </td>
+                <td>
+                    <a href="{{ url_for('claim.submit_claim_page', found_report_id=m.found_report_id) }}" class="btn btn-primary btn-sm">Claim Item</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted); font-size: 1rem;">No suitable matches found at this time.</p>
+</div>
+{% endif %}
+{% endblock %}

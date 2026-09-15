@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Audit Logs{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">System Audit Log History</h1>
+        <p class="page-subtitle">Immutable log recording user registrations, report creations, claims, decisions, and handovers.</p>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Action Event</th>
+                <th>Target Entity</th>
+                <th>Event Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else '' }}</td>
+                <td><strong>{{ log.user_name }}</strong></td>
+                <td><span class="badge badge-secondary">{{ log.action }}</span></td>
+                <td>{{ log.entity_type }} #{{ log.entity_id if log.entity_id else '-' }}</td>
+                <td style="font-size: 0.9rem;">{{ log.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

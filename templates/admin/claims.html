@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Claims Review{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Claims & Verification Review</h1>
+        <p class="page-subtitle">Review claimant responses against hidden verification criteria and issue authority decisions.</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <form method="GET" action="{{ url_for('admin.claims') }}" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label class="form-label">Filter Status</label>
+            <select name="status" class="form-control">
+                <option value="">All Claims</option>
+                <option value="UNDER_VERIFICATION" {% if status_filter == 'UNDER_VERIFICATION' %}selected{% endif %}>UNDER_VERIFICATION</option>
+                <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>APPROVED</option>
+                <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>REJECTED</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+{% if claims %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Claim ID</th>
+                <th>Target Found Item</th>
+                <th>Claimant</th>
+                <th>Submitted Date</th>
+                <th>Status</th>
+                <th>Review Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in claims %}
+            <tr>
+                <td>#{{ c.id }}</td>
+                <td>
+                    <strong>{{ c.found_report.item_name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ c.found_report.public_report_id }} ({{ c.found_report.location }})</small>
+                </td>
+                <td>
+                    <strong>{{ c.claimant.name }}</strong><br>
+                    <small style="color: var(--text-muted);">{{ c.claimant.email }}</small>
+                </td>
+                <td>{{ c.submitted_at.strftime('%Y-%m-%d') if c.submitted_at else '' }}</td>
+                <td><span class="badge {{ c.status|status_badge }}">{{ c.status }}</span></td>
+                <td>
+                    <a href="{{ url_for('admin.claim_review', claim_id=c.id) }}" class="btn {{ 'btn-primary' if c.status == 'UNDER_VERIFICATION' else 'btn-secondary' }} btn-sm">
+                        {{ 'Review & Decide' if c.status == 'UNDER_VERIFICATION' else 'View Record' }}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted);">No submitted claims found.</p>
+</div>
+{% endif %}
+{% endblock %}
