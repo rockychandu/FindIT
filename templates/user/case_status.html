@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Case Status - LF-2026-{{ "%06d"|format(claim.id) }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div class="page-header" style="background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 1.5rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <h1 class="page-title" style="margin: 0; font-size: 1.5rem; color: var(--primary);">Case Status: LF-2026-{{ "%06d"|format(claim.id) }}</h1>
+                <span class="badge {{ claim.status|status_badge }}" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">{{ claim.status }}</span>
+            </div>
+            <p class="page-subtitle" style="margin-top: 0.3rem;">FindIT College Lost & Found Official Investigation Lifecycle</p>
+        </div>
+        <div>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- MAIN STATUS CARD WITH CLEAR EXPLANATIONS -->
+    <div class="card" style="margin-bottom: 1.5rem; border-top: 4px solid #8063F5;">
+        <h3 class="card-title" style="margin-bottom: 1rem; font-size: 1.25rem; color: var(--primary);">
+            Item: {{ claim.found_report.item_name }}
+        </h3>
+
+        {% if claim.status == 'AWAITING_AUTHORITY_DECISION' or claim.status == 'UNDER_VERIFICATION' or claim.status == 'SUBMITTED' %}
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; color: #1E40AF;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #1E3A8A; display: flex; align-items: center; gap: 0.5rem;">
+                ⏳ Verification Submitted — Awaiting Authority Decision
+            </h4>
+            <p style="margin-bottom: 0.75rem; font-size: 0.95rem;">
+                Your verification answers have been submitted securely to the college Lost & Found authority.
+            </p>
+            <div style="background: white; padding: 0.85rem; border-radius: 0.35rem; border: 1px solid #DBEAFE; font-size: 0.88rem;">
+                <strong>What Authority is Reviewing:</strong>
+                <ul style="margin: 0.3rem 0 0 1.2rem; padding: 0;">
+                    <li>Your reported lost item details & verification answers</li>
+                    <li>Found person's reported item details</li>
+                    <li>Algorithmic match confidence breakdown</li>
+                    <li>Both parties' campus authorization information</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: #F8FAFC; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); font-size: 0.9rem;">
+            <div><strong>CURRENT STATUS:</strong> <span class="badge badge-warning">AWAITING AUTHORITY DECISION</span></div>
+            <div style="margin-top: 0.5rem;"><strong>NEXT STEP:</strong> College authority review and match decision.</div>
+            <div style="margin-top: 0.5rem;"><strong>WHO MUST ACT:</strong> College Authority Administrator</div>
+            <div style="margin-top: 0.75rem; padding: 0.6rem; background: #FEF3C7; color: #92400E; border-radius: 0.25rem; font-weight: 600;">
+                ℹ️ YOU DO NOT NEED TO DO ANYTHING RIGHT NOW. You will receive a notification automatically once the authority records a decision.
+            </div>
+        </div>
+
+        {% elif claim.status == 'CLAIM_APPROVED' %}
+        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; color: #065F46;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #064E3B; display: flex; align-items: center; gap: 0.5rem;">
+                🎉 CLAIM CONFIRMED BY COLLEGE AUTHORITY!
+            </h4>
+            <p style="margin-bottom: 0.75rem; font-size: 0.95rem;">
+                The college authority has reviewed your claim and confirmed that this product belongs to you.
+            </p>
+            
+            {% if handover %}
+            <div style="background: white; padding: 1rem; border-radius: 0.35rem; border: 1px solid #6EE7B7; font-size: 0.9rem;">
+                <h5 style="margin-top: 0; color: #047857;">Collection Instructions:</h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div><strong>Handover Location:</strong> {{ handover.location }}</div>
+                    <div><strong>Date:</strong> {{ handover.scheduled_date }}</div>
+                    <div><strong>Time Window:</strong> {{ handover.scheduled_time }}</div>
+                    <div><strong>Required document:</strong> College Student ID</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if is_finder and handover and not handover.found_person_submitted %}
+        <div class="card" style="background: #FFFBEB; border: 2px solid #F59E0B; margin-bottom: 1.5rem;">
+            <h4 style="margin-top: 0; color: #B45309;">Found Person Action Required:</h4>
+            <p style="font-size: 0.9rem; color: #78350F; margin-bottom: 1rem;">
+                Please submit the found item to the college Lost & Found office so the authority can complete the handover to the verified owner.
+            </p>
+            <form method="POST" action="{{ url_for('claim.confirm_finder_submission', handover_id=handover.id) }}">
+                <button type="submit" class="btn btn-warning" style="width: 100%; font-weight: 700;">
+                    ✓ Confirm I Will Submit Item to Authority
+                </button>
+            </form>
+        </div>
+        {% elif is_finder and handover and handover.found_person_submitted %}
+        <div style="padding: 0.75rem; background: #ECFDF5; border-radius: 0.35rem; color: #065F46; font-size: 0.9rem; font-weight: 600;">
+            ✓ You have confirmed item submission to the authority office. Thank you!
+        </div>
+        {% endif %}
+
+        {% if is_claimant and handover and handover.authority_received and not handover.lost_person_collected %}
+        <div class="card" style="background: #EFF6FF; border: 2px solid #3B82F6; margin-bottom: 1.5rem;">
+            <h4 style="margin-top: 0; color: #1D4ED8;">Your Item Is Ready for Collection!</h4>
+            <p style="font-size: 0.9rem; color: #1E40AF; margin-bottom: 1rem;">
+                The authority has physically received your item from the finder. Please visit the office to collect it.
+            </p>
+            <form method="POST" action="{{ url_for('claim.confirm_claimant_collection', handover_id=handover.id) }}">
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700;">
+                    Confirm Ready to Collect
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% elif claim.status == 'CLAIM_REJECTED' %}
+        <div style="background: #FEF2F2; border: 1px solid #FCA5A5; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; color: #991B1B;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #7F1D1D;">
+                Claim Decision: Rejected by Authority
+            </h4>
+            <p style="margin-bottom: 0.5rem; font-size: 0.95rem;">
+                The college authority reviewed the submitted information and concluded it was not sufficient to confirm ownership.
+            </p>
+            <div style="background: white; padding: 0.85rem; border-radius: 0.35rem; border: 1px solid #FECDD3; font-size: 0.9rem;">
+                <strong>Authority Rationale:</strong> {{ claim.decision_reason }}
+            </div>
+        </div>
+
+        {% elif claim.status == 'CLOSED' %}
+        <div style="background: #F3F4F6; border: 1px solid #D1D5DB; padding: 1.25rem; border-radius: 0.5rem; color: #374151;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #111827;">
+                ✓ Case Officially Closed — Item Returned
+            </h4>
+            <p style="margin-bottom: 0; font-size: 0.95rem;">
+                The physical item handover was completed successfully by college authority.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- DUAL PARTY SUMMARY DETAILS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; font-size: 0.88rem;">
+            <div style="background: #F8FAFC; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+                <strong style="color: var(--primary);">Lost Item Report:</strong>
+                <div>Item: {{ claim.found_report.item_name }}</div>
+                <div>Category: {{ claim.found_report.category.name if claim.found_report.category else 'N/A' }}</div>
+                <div>Location: {{ claim.found_report.location }}</div>
+            </div>
+            <div style="background: #F8FAFC; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+                <strong style="color: var(--primary);">Authority Office:</strong>
+                <div>Location: College Lost & Found Office</div>
+                <div>Support: admin@college.edu</div>
+                <div>Phone: 9876543210</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
